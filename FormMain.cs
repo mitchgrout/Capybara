@@ -32,6 +32,11 @@ namespace Capybara
         protected volatile LinkedList<EventInformation> _record;
 
         /// <summary>
+        /// Notifies the worker thread if it should stop, instead of using Thread.Abort
+        /// </summary>
+        protected volatile bool _running;
+
+        /// <summary>
         /// The number of mouse events to record per second
         /// </summary>
         public const int EventsPerSecond = 60;
@@ -106,17 +111,15 @@ namespace Capybara
         {
             //Unregister the presumably set hotkey
             UnregisterHotKey(this.Handle, _id);
-            //Kill the worker thread if it's still running
-            if (_worker != null && _worker.IsAlive)
-                _worker.Abort();
+
+            StopWorkerThread();
         }
         
         private void buttonRecord_Click(object sender, EventArgs e)
         {
             this.Text = "Capybara - Recording";
-            //Kill the worker thread if it's currently doing something
-            if (_worker != null && _worker.IsAlive)
-                _worker.Abort();
+
+            StopWorkerThread();
             
             //Clear out the record list
             if (_record == null)
@@ -129,7 +132,7 @@ namespace Capybara
             {
                 MouseButtons oldState = default(MouseButtons), newState = default(MouseButtons);
                 
-                while(true)
+                while(_running)
                 {
                     newState = Control.MouseButtons;
                     
@@ -144,25 +147,28 @@ namespace Capybara
 
                     Thread.Sleep(1000 / EventsPerSecond);
                 }
+
+                //TODO: Change this so we only add a 0x4 if there's an unterminated 0x2,
+                //      and same for 0x10 and 0x8
+                _record.AddLast(new EventInformation(Cursor.Position, 0x6 | 0x18));
             });
+            _running = true;
             _worker.Start();
         }
 
         private void buttonStop_Click(object sender, EventArgs e)
         {
             this.Text = "Capybara";
-            //Kill the worker thread if it's currently doing something
-            if (_worker != null && _worker.IsAlive)
-                _worker.Abort();
+
+            StopWorkerThread();
+
             //Un-click all buttons in case we stopped midway through an extended click
             SendClick(LEFT_UP | RIGHT_UP);
         }
 
         private void buttonPlay_Click(object sender, EventArgs e)
         {
-            //Kill the worker thread if it's currently doing something
-            if (_worker != null && _worker.IsAlive)
-                _worker.Abort();
+            StopWorkerThread();
 
             //Stop if there's nothing to play
             if (_record == null || _record.Count == 0)
@@ -174,11 +180,15 @@ namespace Capybara
             {
                 foreach(var entry in _record)
                 {
+                    //Early termination
+                    if (!_running)
+                        break;
                     Cursor.Position = entry.Position;
                     SendClick(entry.Flag);
                     Thread.Sleep(1000 / EventsPerSecond);
                 }
             });
+            _running = true;
             _worker.Start();
         }
 
@@ -191,6 +201,20 @@ namespace Capybara
                 buttonStop.PerformClick();
             }
             base.WndProc(ref m);
+        }
+
+        protected void StopWorkerThread()
+        {
+            //Notify the worker thread to stop running
+            if (_worker != null && _worker.IsAlive)
+            {
+                //Give the worker thread 50ms to finish
+                if (!_worker.Join(50))
+                {
+                    //Otherwise, forcibly abort it
+                    _worker.Abort();
+                }
+            }
         }
 
         protected void SendClick(uint flag, int dx = 0, int dy = 0)
