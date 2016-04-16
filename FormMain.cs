@@ -42,13 +42,50 @@ namespace Capybara
         [DllImport("user32.dll")]
         protected static extern bool UnregisterHotKey(IntPtr hWnd, int id);
         [DllImport("user32.dll")]
-        protected static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint dwData, uint dwExtraInfo);
+        protected static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
 
-        //mouse_event dwFlags:
+        //MOUSEINPUT dwFlags:
         public const uint LEFT_DOWN  = 0x02,
                           LEFT_UP    = 0x04,
                           RIGHT_DOWN = 0x08,
                           RIGHT_UP   = 0x10;
+
+        [StructLayout(LayoutKind.Sequential)]
+        protected struct INPUT
+        {
+            public uint type; //mouse = 0, keyboard = 1, hardware = 2
+            public MOUSEINPUT mi;
+            //Keyboard and hardware emulation
+            //is not required by Capybara
+            //MOUSEINPUT is also larger than KEYBDINPUT and
+            //HARDWAREINPUT so INPUT remains the correct size
+
+            public INPUT(uint dwFlags)
+                : this(dwFlags, 0, 0)
+            { }
+
+            public INPUT(uint dwFlags, int dx, int dy)
+            {
+                this.type = 0;
+                this.mi = new MOUSEINPUT
+                    {
+                        dwFlags = dwFlags, 
+                        dx = dx, 
+                        dy = dy,
+                    };
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        protected struct MOUSEINPUT
+        {
+            public int dx;
+            public int dy;
+            public uint mouseData;
+            public uint dwFlags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
 
         public FormMain()
         {
@@ -118,7 +155,7 @@ namespace Capybara
             if (_worker != null && _worker.IsAlive)
                 _worker.Abort();
             //Un-click all buttons in case we stopped midway through an extended click
-            mouse_event(LEFT_UP | RIGHT_UP, 0, 0, 0, 0);
+            SendClick(LEFT_UP | RIGHT_UP);
         }
 
         private void buttonPlay_Click(object sender, EventArgs e)
@@ -138,8 +175,7 @@ namespace Capybara
                 foreach(var entry in _record)
                 {
                     Cursor.Position = entry.Position;
-                    if (entry.Flag != 0)
-                        mouse_event(entry.Flag, 0, 0, 0, 0);
+                    SendClick(entry.Flag);
                     Thread.Sleep(1000 / EventsPerSecond);
                 }
             });
@@ -155,6 +191,19 @@ namespace Capybara
                 buttonStop.PerformClick();
             }
             base.WndProc(ref m);
+        }
+
+        protected void SendClick(uint flag, int dx = 0, int dy = 0)
+        {
+            if(flag != 0)
+            {
+                if (SendInput(1, new INPUT[] { new INPUT(flag, dx, dy) }, Marshal.SizeOf(typeof(INPUT))) == 0)
+                {
+                    #if DEBUG
+                    System.Diagnostics.Debug.Fail("SendInput returned zero");
+                    #endif
+                }
+            }
         }
     }
 
