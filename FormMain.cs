@@ -152,7 +152,11 @@ namespace Capybara
                 //      and same for 0x10 and 0x8
                 _record.AddLast(new EventInformation(Cursor.Position, 0x6 | 0x18));
             });
+
             _running = true;
+            this.buttonRecord.Enabled = false;
+            this.buttonPlay.Enabled = false;
+
             _worker.Start();
         }
 
@@ -161,9 +165,10 @@ namespace Capybara
             this.Text = "Capybara";
 
             StopWorkerThread();
-
-            //Un-click all buttons in case we stopped midway through an extended click
-            SendClick(LEFT_UP | RIGHT_UP);
+            
+            //Re-enable all disabled buttons
+            foreach (Button b in this.Controls.OfType<Button>())
+                b.Enabled = true;
         }
 
         private void buttonPlay_Click(object sender, EventArgs e)
@@ -188,7 +193,11 @@ namespace Capybara
                     Thread.Sleep(1000 / EventsPerSecond);
                 }
             });
+
             _running = true;
+            this.buttonRecord.Enabled = false;
+            this.buttonPlay.Enabled = false;
+
             _worker.Start();
         }
 
