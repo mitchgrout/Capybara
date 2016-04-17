@@ -28,10 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.buttonRecord = new System.Windows.Forms.Button();
             this.buttonStop = new System.Windows.Forms.Button();
             this.buttonPlay = new System.Windows.Forms.Button();
             this.checkBoxRepeat = new System.Windows.Forms.CheckBox();
+            this.trackBarReplaySpeed = new System.Windows.Forms.TrackBar();
+            this.labelReplaySpeed = new System.Windows.Forms.Label();
+            this.toolTipReplaySpeed = new System.Windows.Forms.ToolTip(this.components);
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarReplaySpeed)).BeginInit();
             this.SuspendLayout();
             // 
             // buttonRecord
@@ -74,20 +79,45 @@
             this.checkBoxRepeat.Text = "Repeat?";
             this.checkBoxRepeat.UseVisualStyleBackColor = true;
             // 
+            // trackBarReplaySpeed
+            // 
+            this.trackBarReplaySpeed.Location = new System.Drawing.Point(0, 55);
+            this.trackBarReplaySpeed.Maximum = 40;
+            this.trackBarReplaySpeed.Minimum = -40;
+            this.trackBarReplaySpeed.Name = "trackBarReplaySpeed";
+            this.trackBarReplaySpeed.Size = new System.Drawing.Size(225, 45);
+            this.trackBarReplaySpeed.TabIndex = 4;
+            this.trackBarReplaySpeed.Scroll += (o, e) =>
+                {
+                    toolTipReplaySpeed.SetToolTip(this.trackBarReplaySpeed, System.String.Format("{0:0.0000}x", System.Math.Pow(2, trackBarReplaySpeed.Value / 10f)));
+                };
+            // 
+            // labelReplaySpeed
+            // 
+            this.labelReplaySpeed.AutoSize = true;
+            this.labelReplaySpeed.Location = new System.Drawing.Point(0, 39);
+            this.labelReplaySpeed.Name = "labelReplaySpeed";
+            this.labelReplaySpeed.Size = new System.Drawing.Size(77, 13);
+            this.labelReplaySpeed.TabIndex = 5;
+            this.labelReplaySpeed.Text = "Replay Speed:";
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(225, 39);
+            this.ClientSize = new System.Drawing.Size(225, 85);
+            this.Controls.Add(this.labelReplaySpeed);
+            this.Controls.Add(this.trackBarReplaySpeed);
             this.Controls.Add(this.checkBoxRepeat);
             this.Controls.Add(this.buttonPlay);
             this.Controls.Add(this.buttonStop);
             this.Controls.Add(this.buttonRecord);
-            this.MaximumSize = new System.Drawing.Size(241, 77);
-            this.MinimumSize = new System.Drawing.Size(241, 77);
+            this.MaximumSize = new System.Drawing.Size(241, 123);
+            this.MinimumSize = new System.Drawing.Size(241, 123);
             this.Name = "FormMain";
             this.Text = "Capybara";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarReplaySpeed)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -99,6 +129,9 @@
         private System.Windows.Forms.Button buttonStop;
         private System.Windows.Forms.Button buttonPlay;
         private System.Windows.Forms.CheckBox checkBoxRepeat;
+        private System.Windows.Forms.TrackBar trackBarReplaySpeed;
+        private System.Windows.Forms.Label labelReplaySpeed;
+        private System.Windows.Forms.ToolTip toolTipReplaySpeed;
     }
 }
 

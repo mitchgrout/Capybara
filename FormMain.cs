@@ -186,6 +186,8 @@ namespace Capybara
             this.Text = "Capybara - Playing";
 
             bool _repeat = checkBoxRepeat.Checked;
+            //We expect trackBarReplaySpeed to be a LOGARITHMIC scale, so we need to transform the value
+            double _replayRate = Math.Pow(2, trackBarReplaySpeed.Value / 10f);
 
             //Recreate the worker thread
             _worker = new Thread(() =>
@@ -199,7 +201,7 @@ namespace Capybara
                             break;
                         Cursor.Position = entry.Position;
                         SendClick(entry.Flag);
-                        Thread.Sleep(1000 / EventsPerSecond);
+                        Thread.Sleep((int)(1000 / (EventsPerSecond * _replayRate)));
                     }
                 } while (_repeat);
             });
