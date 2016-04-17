@@ -154,8 +154,12 @@ namespace Capybara
             });
 
             _running = true;
-            this.buttonRecord.Enabled = false;
-            this.buttonPlay.Enabled = false;
+            //Disable everything except buttonStop
+            //this.buttonRecord.Enabled = false;
+            //this.buttonPlay.Enabled = false;
+            foreach(Control c in this.Controls)
+                if(c != buttonStop)
+                    c.Enabled = false;
 
             _worker.Start();
         }
@@ -166,9 +170,9 @@ namespace Capybara
 
             StopWorkerThread();
             
-            //Re-enable all disabled buttons
-            foreach (Button b in this.Controls.OfType<Button>())
-                b.Enabled = true;
+            //Re-enable all disabled controls
+            foreach (Control c in this.Controls)
+                c.Enabled = true;
         }
 
         private void buttonPlay_Click(object sender, EventArgs e)
@@ -180,23 +184,33 @@ namespace Capybara
                 return;
 
             this.Text = "Capybara - Playing";
+
+            bool _repeat = checkBoxRepeat.Checked;
+
             //Recreate the worker thread
             _worker = new Thread(() =>
             {
-                foreach(var entry in _record)
+                do
                 {
-                    //Early termination
-                    if (!_running)
-                        break;
-                    Cursor.Position = entry.Position;
-                    SendClick(entry.Flag);
-                    Thread.Sleep(1000 / EventsPerSecond);
-                }
+                    foreach (var entry in _record)
+                    {
+                        //Early termination
+                        if (!_running)
+                            break;
+                        Cursor.Position = entry.Position;
+                        SendClick(entry.Flag);
+                        Thread.Sleep(1000 / EventsPerSecond);
+                    }
+                } while (_repeat);
             });
 
             _running = true;
-            this.buttonRecord.Enabled = false;
-            this.buttonPlay.Enabled = false;
+            //Disable everything except buttonStop
+            //this.buttonRecord.Enabled = false;
+            //this.buttonPlay.Enabled = false;
+            foreach (Control c in this.Controls)
+                if (c != buttonStop)
+                    c.Enabled = false;
 
             _worker.Start();
         }

@@ -31,6 +31,7 @@
             this.buttonRecord = new System.Windows.Forms.Button();
             this.buttonStop = new System.Windows.Forms.Button();
             this.buttonPlay = new System.Windows.Forms.Button();
+            this.checkBoxRepeat = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // buttonRecord
@@ -63,18 +64,32 @@
             this.buttonPlay.UseVisualStyleBackColor = true;
             this.buttonPlay.Click += new System.EventHandler(this.buttonPlay_Click);
             // 
+            // checkBoxRepeat
+            // 
+            this.checkBoxRepeat.AutoSize = true;
+            this.checkBoxRepeat.Location = new System.Drawing.Point(0, 23);
+            this.checkBoxRepeat.Name = "checkBoxRepeat";
+            this.checkBoxRepeat.Size = new System.Drawing.Size(67, 17);
+            this.checkBoxRepeat.TabIndex = 3;
+            this.checkBoxRepeat.Text = "Repeat?";
+            this.checkBoxRepeat.UseVisualStyleBackColor = true;
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(225, 23);
+            this.ClientSize = new System.Drawing.Size(225, 39);
+            this.Controls.Add(this.checkBoxRepeat);
             this.Controls.Add(this.buttonPlay);
             this.Controls.Add(this.buttonStop);
             this.Controls.Add(this.buttonRecord);
+            this.MaximumSize = new System.Drawing.Size(241, 77);
+            this.MinimumSize = new System.Drawing.Size(241, 77);
             this.Name = "FormMain";
             this.Text = "Capybara";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -83,6 +98,7 @@
         private System.Windows.Forms.Button buttonRecord;
         private System.Windows.Forms.Button buttonStop;
         private System.Windows.Forms.Button buttonPlay;
+        private System.Windows.Forms.CheckBox checkBoxRepeat;
     }
 }
 
