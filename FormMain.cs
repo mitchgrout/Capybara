@@ -13,7 +13,6 @@ namespace Capybara
         //TODO:
         //- Recording interpolation between non-zero flag events
         //- Option to ignore movement-only events, and reset mouse position after event 
-        //- Changeable replay speed
         //- Potentially allow direct editing of a record
 
         /// <summary>
@@ -60,10 +59,8 @@ namespace Capybara
         {
             public uint type; //mouse = 0, keyboard = 1, hardware = 2
             public MOUSEINPUT mi;
-            //Keyboard and hardware emulation
-            //is not required by Capybara
-            //MOUSEINPUT is also larger than KEYBDINPUT and
-            //HARDWAREINPUT so INPUT remains the correct size
+            //Keyboard and hardware emulation is not required by Capybara
+            //MOUSEINPUT is also larger than KEYBDINPUT and HARDWAREINPUT so INPUT remains the correct size
 
             public INPUT(uint dwFlags)
                 : this(dwFlags, 0, 0)
@@ -105,6 +102,7 @@ namespace Capybara
             {
                 MessageBox.Show("Failed to register Pause as the interrupt hotkey", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+            //TODO: Add hotkeys for replaying and recording
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -155,8 +153,6 @@ namespace Capybara
 
             _running = true;
             //Disable everything except buttonStop
-            //this.buttonRecord.Enabled = false;
-            //this.buttonPlay.Enabled = false;
             foreach(Control c in this.Controls)
                 if(c != buttonStop)
                     c.Enabled = false;
@@ -208,8 +204,6 @@ namespace Capybara
 
             _running = true;
             //Disable everything except buttonStop
-            //this.buttonRecord.Enabled = false;
-            //this.buttonPlay.Enabled = false;
             foreach (Control c in this.Controls)
                 if (c != buttonStop)
                     c.Enabled = false;
@@ -258,8 +252,16 @@ namespace Capybara
 
     public sealed class EventInformation
     {
+        /// <summary>
+        /// Position at which the event was recorded
+        /// </summary>
         public readonly Point Position;
+        
+        /// <summary>
+        /// The dwFlags value passed to SendInput
+        /// </summary>
         public readonly uint Flag;
+        
         public EventInformation(Point pos, uint flag)
         {
             Position = pos;
