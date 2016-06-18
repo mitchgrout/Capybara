@@ -174,12 +174,13 @@ namespace Capybara
             //WM_HOTKEY = 0x0312
             if (m.Msg == 0x0312 && m.WParam.ToInt32() == _id)
             {
-                //If nothing is running, begin running
-                if (_worker == null || !_worker.IsAlive)
-                    buttonPlay.PerformClick();
-                //Otherwise, should act the same as pressing the Stop button
-                else
+
+                //Should act the same as pressing the Stop button if something is running
+                if (IsRunning())
                     buttonStop.PerformClick();
+                //Otherwise, begin running
+                else
+                    buttonPlay.PerformClick();                    
             }
             base.WndProc(ref m);
         }
@@ -187,7 +188,7 @@ namespace Capybara
         protected void StopWorkerThread()
         {
             //Notify the worker thread to stop running
-            if (_worker != null && _worker.IsAlive)
+            if (IsRunning())
             {
                 //Signal the thread to stop
                 _running = false;
@@ -198,6 +199,11 @@ namespace Capybara
                     _worker.Abort();
                 }
             }
+        }
+
+        protected bool IsRunning()
+        {
+            return _worker != null && _worker.IsAlive;
         }
     }
 
