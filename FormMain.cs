@@ -93,6 +93,12 @@ namespace Capybara
         {
             InitializeComponent();
 
+            //For some reason VS complains about this being present in the Designer.cs
+            this.trackBarReplaySpeed.Scroll += (o, e) =>
+            {
+                toolTipReplaySpeed.SetToolTip(this.trackBarReplaySpeed, System.String.Format("{0:0.0000}x", System.Math.Pow(2, trackBarReplaySpeed.Value / 10f)));
+            };
+
             //Keep this form on the top
             this.TopMost = true;
 
@@ -216,8 +222,12 @@ namespace Capybara
             //Bailout
             if (m.Msg == 0x0312 && m.WParam.ToInt32() == _id)
             {
-                //Pause key should act the same as pressing the Stop button
-                buttonStop.PerformClick();
+                //If nothing is running, begin running
+                if (_worker == null || !_worker.IsAlive)
+                    buttonPlay.PerformClick();
+                //Otherwise, should act the same as pressing the Stop button
+                else
+                    buttonStop.PerformClick();
             }
             base.WndProc(ref m);
         }

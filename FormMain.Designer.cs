@@ -87,10 +87,7 @@
             this.trackBarReplaySpeed.Name = "trackBarReplaySpeed";
             this.trackBarReplaySpeed.Size = new System.Drawing.Size(225, 45);
             this.trackBarReplaySpeed.TabIndex = 4;
-            this.trackBarReplaySpeed.Scroll += (o, e) =>
-                {
-                    toolTipReplaySpeed.SetToolTip(this.trackBarReplaySpeed, System.String.Format("{0:0.0000}x", System.Math.Pow(2, trackBarReplaySpeed.Value / 10f)));
-                };
+            
             // 
             // labelReplaySpeed
             // 
