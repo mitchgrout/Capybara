@@ -4,8 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
-using System.Runtime.InteropServices;
-
+        
 namespace Capybara
 {
     public partial class FormMain : Form
@@ -40,54 +39,6 @@ namespace Capybara
         /// </summary>
         public const int EventsPerSecond = 60;
 
-        //Required extern functions
-        [DllImport("user32.dll")]
-        protected static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
-        [DllImport("user32.dll")]
-        protected static extern bool UnregisterHotKey(IntPtr hWnd, int id);
-        [DllImport("user32.dll")]
-        protected static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
-
-        //MOUSEINPUT dwFlags:
-        public const uint LEFT_DOWN  = 0x02,
-                          LEFT_UP    = 0x04,
-                          RIGHT_DOWN = 0x08,
-                          RIGHT_UP   = 0x10;
-
-        [StructLayout(LayoutKind.Sequential)]
-        protected struct INPUT
-        {
-            public uint type; //mouse = 0, keyboard = 1, hardware = 2
-            public MOUSEINPUT mi;
-            //Keyboard and hardware emulation is not required by Capybara
-            //MOUSEINPUT is also larger than KEYBDINPUT and HARDWAREINPUT so INPUT remains the correct size
-
-            public INPUT(uint dwFlags)
-                : this(dwFlags, 0, 0)
-            { }
-
-            public INPUT(uint dwFlags, int dx, int dy)
-            {
-                this.type = 0;
-                this.mi = new MOUSEINPUT
-                    {
-                        dwFlags = dwFlags, 
-                        dx = dx, 
-                        dy = dy,
-                    };
-            }
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        protected struct MOUSEINPUT
-        {
-            public int dx;
-            public int dy;
-            public uint mouseData;
-            public uint dwFlags;
-            public uint time;
-            public IntPtr dwExtraInfo;
-        }
 
         public FormMain()
         {
@@ -202,7 +153,7 @@ namespace Capybara
                         if (!_running)
                             break;
                         Cursor.Position = entry.Position;
-                        SendClick(entry.Flag);
+                        Windows.SendClick(entry.Flag);
                         Thread.Sleep((int)(1000 / (EventsPerSecond * _replayRate)));
                     }
                 } while (_repeat);
@@ -220,6 +171,7 @@ namespace Capybara
         protected override void WndProc(ref Message m)
         {
             //Bailout
+            //WM_HOTKEY = 0x0312
             if (m.Msg == 0x0312 && m.WParam.ToInt32() == _id)
             {
                 //If nothing is running, begin running
@@ -237,24 +189,13 @@ namespace Capybara
             //Notify the worker thread to stop running
             if (_worker != null && _worker.IsAlive)
             {
+                //Signal the thread to stop
+                _running = false;
                 //Give the worker thread 50ms to finish
                 if (!_worker.Join(50))
                 {
                     //Otherwise, forcibly abort it
                     _worker.Abort();
-                }
-            }
-        }
-
-        protected void SendClick(uint flag, int dx = 0, int dy = 0)
-        {
-            if(flag != 0)
-            {
-                if (SendInput(1, new INPUT[] { new INPUT(flag, dx, dy) }, Marshal.SizeOf(typeof(INPUT))) == 0)
-                {
-                    #if DEBUG
-                    System.Diagnostics.Debug.Fail("SendInput returned zero");
-                    #endif
                 }
             }
         }
