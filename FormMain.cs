@@ -55,7 +55,7 @@ namespace Capybara
 
             //Attempt to register Pause as a hotkey for our application
             //Fails if another process has registered Pause as a hotkey
-            if((_id = Enumerable.Range(1, 100).FirstOrDefault(v => RegisterHotKey(this.Handle, v, 0, (int)Keys.Pause))) == 0)
+            if ((_id = Enumerable.Range(1, 100).FirstOrDefault(v => Windows.RegisterHotKey(this.Handle, v, 0, (int)Keys.Pause))) == 0)
             {
                 MessageBox.Show("Failed to register Pause as the interrupt hotkey", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
@@ -65,7 +65,7 @@ namespace Capybara
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             //Unregister the presumably set hotkey
-            UnregisterHotKey(this.Handle, _id);
+            Windows.UnregisterHotKey(this.Handle, _id);
 
             StopWorkerThread();
         }
@@ -92,10 +92,10 @@ namespace Capybara
                     newState = Control.MouseButtons;
                     
                     _record.AddLast(new EventInformation(Cursor.Position,
-                            (newState.HasFlag(MouseButtons.Left) && !oldState.HasFlag(MouseButtons.Left)? LEFT_DOWN : 0) |
-                            (!newState.HasFlag(MouseButtons.Left) && oldState.HasFlag(MouseButtons.Left) ? LEFT_UP : 0) |
-                            (newState.HasFlag(MouseButtons.Right) && !oldState.HasFlag(MouseButtons.Right) ? RIGHT_DOWN : 0) |
-                            (!newState.HasFlag(MouseButtons.Right) && oldState.HasFlag(MouseButtons.Right)? RIGHT_UP : 0)
+                            (newState.HasFlag(MouseButtons.Left) && !oldState.HasFlag(MouseButtons.Left)? Windows.LEFT_DOWN : 0) |
+                            (!newState.HasFlag(MouseButtons.Left) && oldState.HasFlag(MouseButtons.Left) ? Windows.LEFT_UP : 0) |
+                            (newState.HasFlag(MouseButtons.Right) && !oldState.HasFlag(MouseButtons.Right) ? Windows.RIGHT_DOWN : 0) |
+                            (!newState.HasFlag(MouseButtons.Right) && oldState.HasFlag(MouseButtons.Right) ? Windows.RIGHT_UP : 0)
                         ));
 
                     oldState = newState;
@@ -124,8 +124,8 @@ namespace Capybara
             StopWorkerThread();
             
             //Re-enable all disabled controls
-            foreach (Control c in this.Controls)
-                c.Enabled = true;
+            foreach (Button b in this.Controls.OfType<Button>())
+                b.Enabled = true;
         }
 
         private void buttonPlay_Click(object sender, EventArgs e)

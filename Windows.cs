@@ -10,13 +10,13 @@ namespace Capybara
     /// <summary>
     /// Contains utility functions provided by the operating system
     /// </summary>
-    static class Windows
+    abstract class Windows
     {
         //Required extern functions
         [DllImport("user32.dll")]
-        protected static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
+        public static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
         [DllImport("user32.dll")]
-        protected static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+        public static extern bool UnregisterHotKey(IntPtr hWnd, int id);
         [DllImport("user32.dll")]
         protected static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
 
